@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <configSections>
+    <sectionGroup name="lnf">
+      <section name="providers" type="LNF.ProvidersSection, LNF" />
+      <section name="redis" type="LNF.Impl.Redis.RedisConfigurationSection, LNF.Impl" />
+    </sectionGroup>
+  </configSections>
+
+  <lnf>
+    <providers production="false">
+      <context type="LNF.DefaultContextProvider, LNF" loginUrl="/login" />
+      <dataAccess type="LNF.Impl.NHibernateCallDataAccess, LNF.Impl" />
+    </providers>
+    <redis>
+      <connection host="cachesvr" databaseId="5"></connection>
+    </redis>
+  </lnf>
+
+  <connectionStrings>
+    <add name="cnSselData" connectionString="Server=xxxxx;Database=xxxxx;User ID=xxxxx;Password=xxxxx" providerName="System.Data.SqlClient" />
+  </connectionStrings>
+
+  <appSettings>
+    <add key="ServiceHostTcp" value="net.tcp://0.0.0.0:7779" />
+    <add key="ServiceHostHttp" value="http://+:7778" />
+    <add key="WagoServiceTimeout" value="10" />
+    <add key="ControlConnectionDevelopment" value="WagoService.Test.TestConnection, WagoService" />
+    <!--<add key="ControlConnectionDevelopment" value="WagoService.Test.SingleWagoConnection, WagoService" />-->
+    <add key="ControlConnectionProduction" value="WagoService.Wago.WagoConnection, WagoService" />
+    <add key="MongoConnectionString" value="mongodb://xxxxx:xxxxx@localhost" />
+  </appSettings>
+
+  <startup>
+    <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.6.1" />
+  </startup>
+</configuration>
