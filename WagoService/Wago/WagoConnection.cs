@@ -11,7 +11,7 @@ namespace WagoService.Wago
 {
     public class WagoConnection : IControlConnection
     {
-        private Socket Connect(Block block)
+        protected Socket Connect(Block block)
         {
             // Create a TCP/IP socket for block communications
             try
@@ -26,7 +26,7 @@ namespace WagoService.Wago
             }
         }
 
-        public BlockResponse SendGetBlockStateCommand(BlockAction action)
+        public virtual BlockResponse SendGetBlockStateCommand(BlockAction action)
         {
             using (var sender = Connect(action.Block))
             {
@@ -72,7 +72,7 @@ namespace WagoService.Wago
             }
         }
 
-        private int SendMessageToBlock(Socket socket, byte[] buffer, byte[] recvBuffer, bool hasReturnValue)
+        protected int SendMessageToBlock(Socket socket, byte[] buffer, byte[] recvBuffer, bool hasReturnValue)
         {
             // Encode the data string into a byte array.
             if (socket.Connected)
@@ -145,7 +145,7 @@ namespace WagoService.Wago
             return 0;
         }
 
-        private byte[] CreateGetBlockStateBuffer()
+        protected byte[] CreateGetBlockStateBuffer()
         {
             byte[] result = new byte[65];
             result[0] = 0x2;

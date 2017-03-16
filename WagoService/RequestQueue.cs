@@ -1,8 +1,9 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Threading;
+﻿using LNF;
 using LNF.Control;
 using LNF.Repository.Control;
+using System;
+using System.Collections.Concurrent;
+using System.Threading;
 using WagoService.Actions;
 
 namespace WagoService
@@ -57,6 +58,7 @@ namespace WagoService
 
                     try
                     {
+
                         action = _queue.Take();
 
                         Log.Write(Block.BlockID, "RECV:{0}", action.GetLogMessage());
@@ -66,7 +68,9 @@ namespace WagoService
                         if (action is StopAction) break;
 
                         //process the message
-                        response = action.ExecuteCommand(_service);
+                        using (Providers.DataAccess.StartUnitOfWork())
+                            response = action.ExecuteCommand(_service);
+
                         _responses.Add(action.MessageID, response);
 
                         lock (locker)
