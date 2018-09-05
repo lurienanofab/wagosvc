@@ -34,13 +34,13 @@ namespace WagoService
         //get a particular message (based on MessageID) not just whichever one happens to be next in the queue
         private ControlResponseCollection _responses = new ControlResponseCollection();
 
-        private IControlConnection _service;
+        private readonly IControlConnection _connection;
 
         public Block Block { get; private set; }
 
-        public RequestQueue(IControlConnection service)
+        public RequestQueue(IControlConnection connection)
         {
-            _service = service;
+            _connection = connection;
         }
 
         public void Start(Block block)
@@ -49,7 +49,7 @@ namespace WagoService
 
             new Thread(() =>
             {
-                Log.Write(Block.BlockID, "Started thread for queue {0}", Block.BlockName);
+                Log.Write(Block.BlockID, $"Started thread for queue {Block.BlockName}");
 
                 while (true)
                 {
@@ -61,15 +61,17 @@ namespace WagoService
 
                         action = _queue.Take();
 
-                        Log.Write(Block.BlockID, "RECV:{0}", action.GetLogMessage());
+                        Log.Write(Block.BlockID, $"RECV:{action.GetType().Name}:{action.MessageID}");
 
-                        RequestReceived?.Invoke(this, new ControlActionEventArgs() { ID = action.MessageID, TimeStamp = action.TimeStamp, MessageType = "Request" });
+                        RequestReceived?.Invoke(this, new ControlActionEventArgs() { ID = action.MessageID, TimeStamp = action.Timestamp, MessageType = "Request" });
 
                         if (action is StopAction) break;
 
                         //process the message
-                        using (Providers.DataAccess.StartUnitOfWork())
-                            response = action.ExecuteCommand(_service);
+                        using (ServiceProvider.Current.DataAccess.StartUnitOfWork())
+                        {
+                            response = action.Execute(_connection);
+                        }
 
                         _responses.Add(action.MessageID, response);
 
@@ -105,7 +107,7 @@ namespace WagoService
         public void Push(IControlAction action)
         {
             //put a WagoMessage on the queue
-            Log.Write(Block.BlockID, "SEND:{0}", action.GetLogMessage());
+            Log.Write(Block.BlockID, $"SEND:{action.GetType().Name}:{action.MessageID}");
 
             _queue.Add(action);
 
@@ -115,11 +117,10 @@ namespace WagoService
         public ControlResponse GetResponse(Guid id)
         {
             DateTime cutoff = DateTime.Now.AddSeconds(QueueCollection.WagoTimeout);
-            ControlResponse result;
 
             while (DateTime.Now < cutoff)
             {
-                if (_responses.TryRemove(id, out result))
+                if (_responses.TryRemove(id, out ControlResponse result))
                 {
                     EnsureSuccess(result);
                     return result;
@@ -131,9 +132,7 @@ namespace WagoService
 
         private void EnsureSuccess(ControlResponse response)
         {
-            ErrorResponse err = response as ErrorResponse;
-
-            if (err != null)
+            if (response is ErrorResponse err)
                 throw err.Exception;
         }
 

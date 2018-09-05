@@ -21,7 +21,7 @@ namespace WagoService.Wago
         //Returns the points associated with an action
         public static IList<Point> GetPoints(int pointId = 0)
         {
-            using (Providers.DataAccess.StartUnitOfWork())
+            using (ServiceProvider.Current.DataAccess.StartUnitOfWork())
             {
                 if (pointId == 0)
                     return DA.Current.Query<Point>().ToList();

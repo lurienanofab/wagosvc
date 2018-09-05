@@ -20,14 +20,14 @@ namespace WagoService
             return new Uri(baseUri, "WagoService");
         }
 
-        public bool Start<T>() where T : IControlService
+        public bool Start<T>() where T : IService
         {
             return Start(typeof(T));
         }
 
         public bool Start(Type serviceType)
         {
-            Type interfaceType = typeof(IControlService);
+            Type interfaceType = typeof(IService);
             if (!interfaceType.IsAssignableFrom(serviceType))
                 throw new ArgumentException(string.Format("The service type must implement {0}", interfaceType.FullName), "serviceType");
 

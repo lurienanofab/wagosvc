@@ -1,10 +1,10 @@
 ﻿using LNF.Control;
+using LNF.Repository;
 using LNF.Repository.Control;
+using System;
 using System.Linq;
 using System.Net;
-using WagoService.Actions;
 using WagoService.Wago;
-using LNF.Repository;
 
 namespace WagoService.Test
 {
@@ -29,35 +29,43 @@ namespace WagoService.Test
             return base.CreateSetPointStateBuffer(p, state);
         }
 
-        public override BlockResponse SendGetBlockStateCommand(BlockAction action)
+        public override BlockResponse SendGetBlockStateCommand(int blockId)
         {
-            using (var sender = Connect(action.Block))
+            var block = DA.Current.Single<Block>(blockId);
+
+            try
             {
-                byte[] buffer = CreateGetBlockStateBuffer();
-
-                Log.Write(action.Block.BlockID, "WagoConnection: Sending GetBlockState message to block: BlockID = {0}, Data = {1}",
-                    action.Block.BlockID, WagoUtility.GetDataString(buffer));
-
-                byte[] recvBuffer = new byte[65];
-
-                int bytesRecv = SendMessageToBlock(sender, buffer, recvBuffer, true);
-
-                if (bytesRecv > 0)
-                    Log.Write(action.Block.BlockID, "WagoConnection: Received {0} bytes [{1}] from block {2}", bytesRecv, WagoUtility.BytesToString(recvBuffer, bytesRecv), action.Block.BlockID);
-                else
-                    Log.Write(action.Block.BlockID, "WagoConnection: Block {0} did not return any data", action.Block.BlockID);
-
-                BlockResponse result = action.Block.CreateBlockResponse();
-
-                var b = DA.Current.Query<Block>().First(x => x.BlockName == "wago_test");
-
-                result.BlockState.Points = action.Block.Points.Select(x =>
+                using (var sender = Connect(block))
                 {
-                    var p = new Point() { Block = b, ModPosition = 0, Name = x.Name, Offset = x.Offset, PointID = x.PointID };
-                    return WagoUtility.GetPointState(p, recvBuffer);
-                }).ToArray();
+                    byte[] buffer = CreateGetBlockStateBuffer();
 
-                return result;
+                    Log.Write(block.BlockID, $"WagoConnection: Sending GetBlockState message to block: BlockID = {block.BlockID}, Data = {WagoUtility.GetDataString(buffer)}");
+
+                    byte[] recvBuffer = new byte[65];
+
+                    int bytesRecv = SendMessageToBlock(sender, buffer, recvBuffer, true);
+
+                    if (bytesRecv > 0)
+                        Log.Write(block.BlockID, $"WagoConnection: Received {bytesRecv} bytes [{WagoUtility.BytesToString(recvBuffer, bytesRecv)}] from block {block.BlockID}");
+                    else
+                        Log.Write(block.BlockID, $"WagoConnection: Block {block.BlockID} did not return any data");
+
+                    BlockResponse result = block.CreateBlockResponse();
+
+                    var testBlock = DA.Current.Query<Block>().First(x => x.BlockName == "wago_test");
+
+                    result.BlockState.Points = block.Points.Select(x =>
+                    {
+                        var p = new Point() { Block = testBlock, ModPosition = 0, Name = x.Name, Offset = x.Offset, PointID = x.PointID };
+                        return WagoUtility.GetPointState(p, recvBuffer);
+                    }).ToArray();
+
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                return block.CreateBlockResponse(ex);
             }
         }
     }

@@ -1,14 +1,16 @@
 ﻿using LNF;
+using LNF.Impl.DependencyInjection.Default;
 using LNF.Repository;
 using LNF.Repository.Control;
 using Microsoft.Owin.Hosting;
 using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Configuration.Install;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.ServiceProcess;
+using WagoService.Controllers;
 
 namespace WagoService
 {
@@ -40,18 +42,24 @@ namespace WagoService
 
         protected override void OnStart(string[] args)
         {
-            using (Providers.DataAccess.StartUnitOfWork())
+            ServiceProvider.Current = IOC.Resolver.GetInstance<ServiceProvider>();
+
+            using (ServiceProvider.Current.DataAccess.StartUnitOfWork())
             {
                 Log.Start();
 
-                IList<Block> blocks = DA.Current.Query<Block>().ToList();
+                var blocks = DA.Current.Query<Block>().ToList();
 
                 QueueCollection.Current.StartQueues(blocks);
 
                 _webapp = WebApp.Start<Startup>(GetServiceUri());
 
                 _host = new Host();
-                _host.Start<ControlService>();
+                _host.Start<MainController>();
+
+                // prevents duplicate debug messages
+                if (Trace.Listeners["Default"] != null)
+                    Trace.Listeners.Remove("HostingTraceListener");
             }
         }
 

@@ -8,13 +8,13 @@ namespace WagoService
         protected Timer _timer;
         protected bool _cancel;
 
-        public IControlAction Action { get; private set; }
+        public PointAction Action { get; private set; }
         //public Point Point { get; private set; }
         public IRequestQueue Queue { get; private set; }
         public uint Duration { get; private set; }
         //public bool State { get; private set; }
 
-        public PointTimer(IRequestQueue queue, IControlAction action, uint duration)
+        public PointTimer(IRequestQueue queue, PointAction action, uint duration)
         {
             Action = action;
             Queue = queue;
@@ -24,7 +24,7 @@ namespace WagoService
 
         public void Cancel(bool execute)
         {
-            Log.Write("CANCEL:{0}:Duration={1}:Execute={2}", Action.GetLogMessage(), Duration, execute);
+            Log.Write($"CANCEL:PointID={Action.PointID}:Duration={Duration}:Execute={execute}");
 
             if (execute)
                 ExecuteFutureAction();
@@ -34,7 +34,8 @@ namespace WagoService
 
         protected virtual void ExecuteFutureAction()
         {
-            Log.Write("EXEC:{0}:Duration={1}{2}", Action.GetLogMessage(), Duration, (_cancel) ? " (cancelled)" : string.Empty);
+            var cancelled = _cancel ? " (cancelled)" : string.Empty;
+            Log.Write($"EXEC:PointID={Action.PointID}:Duration={Duration}{cancelled}");
 
             if (!_cancel)
             {
@@ -45,8 +46,7 @@ namespace WagoService
 
         protected void Remove()
         {
-            PointTimer pt;
-            FutureActionManager.Current.TryRemove(Action.ActionID, out pt);
+            FutureActionManager.Current.TryRemove(Action.PointID, out PointTimer pt);
         }
     }
 }

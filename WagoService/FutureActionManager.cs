@@ -25,7 +25,7 @@ namespace WagoService
 
         public bool TryAdd(PointTimer pt)
         {
-            return _timers.TryAdd(pt.Action.ActionID, pt);
+            return _timers.TryAdd(pt.Action.PointID, pt);
         }
 
         public bool TryRemove(int pointId, out PointTimer pt)

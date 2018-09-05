@@ -1,11 +1,11 @@
 ﻿using LNF.Control;
+using LNF.Repository;
 using LNF.Repository.Control;
 using System;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using WagoService.Actions;
 
 namespace WagoService.Wago
 {
@@ -22,43 +22,51 @@ namespace WagoService.Wago
             }
             catch (Exception ex)
             {
-                throw new Exception(string.Format("Unable to connect to block: {0}[{1}]{2}-----{2}{3}", block.BlockName, block.IPAddress, Environment.NewLine, ex));
+                throw new Exception($"Unable to connect to block: {block.BlockName}[{block.IPAddress}]{Environment.NewLine}-----{Environment.NewLine}{ex}");
             }
         }
 
-        public virtual BlockResponse SendGetBlockStateCommand(BlockAction action)
+        public virtual BlockResponse SendGetBlockStateCommand(int blockId)
         {
-            using (var sender = Connect(action.Block))
+            Block block = DA.Current.Single<Block>(blockId);
+
+            if (block == null)
+                throw new InvalidOperationException($"Block not found with BlockID = {blockId}");
+
+            using (var sender = Connect(block))
             {
                 byte[] buffer = CreateGetBlockStateBuffer();
 
-                Log.Write(action.Block.BlockID, "WagoConnection: Sending GetBlockState message to block: BlockID = {0}, Data = {1}",
-                    action.Block.BlockID, WagoUtility.GetDataString(buffer));
+                Log.Write(block.BlockID, $"WagoConnection: Sending GetBlockState message to block: BlockID = {block.BlockID}, Data = {WagoUtility.GetDataString(buffer)}");
 
                 byte[] recvBuffer = new byte[65];
 
                 int bytesRecv = SendMessageToBlock(sender, buffer, recvBuffer, true);
 
                 if (bytesRecv > 0)
-                    Log.Write(action.Block.BlockID, "WagoConnection: Received {0} bytes [{1}] from block {2}", bytesRecv, WagoUtility.BytesToString(recvBuffer, bytesRecv), action.Block.BlockID);
+                    Log.Write(block.BlockID, $"WagoConnection: Received {bytesRecv} bytes [{WagoUtility.BytesToString(recvBuffer, bytesRecv)}] from block {block.BlockID}");
                 else
-                    Log.Write(action.Block.BlockID, "WagoConnection: Block {0} did not return any data", action.Block.BlockID);
+                    Log.Write(block.BlockID, $"WagoConnection: Block {block.BlockID} did not return any data");
 
-                BlockResponse result = action.Block.CreateBlockResponse();
-                result.BlockState.Points = action.Block.Points.Select(x => WagoUtility.GetPointState(x, recvBuffer)).ToArray();
+                BlockResponse result = block.CreateBlockResponse();
+                result.BlockState.Points = block.Points.Select(x => WagoUtility.GetPointState(x, recvBuffer)).ToArray();
 
                 return result;
             }
         }
 
-        public PointResponse SendSetPointStateCommand(PointAction action)
+        public PointResponse SendSetPointStateCommand(int pointId, bool state)
         {
-            using (var sender = Connect(action.Point.Block))
-            {
-                byte[] buffer = CreateSetPointStateBuffer(action.Point, action.State);
+            Point point = DA.Current.Single<Point>(pointId);
 
-                Log.Write(action.Point.Block.BlockID, "WagoConnection: Sending SetPointState message to block: BlockID = {0}, PointID = {1}, Data = {2}",
-                    action.Point.Block.BlockID, action.Point.PointID, WagoUtility.GetDataString(buffer));
+            if (point == null)
+                throw new InvalidOperationException($"Point not found with PointID = {pointId}");
+
+            using (var sender = Connect(point.Block))
+            {
+                byte[] buffer = CreateSetPointStateBuffer(point, state);
+
+                Log.Write(point.Block.BlockID, $"WagoConnection: Sending SetPointState message to block: BlockID = {point.Block.BlockID}, PointID = {point.PointID}, Data = {WagoUtility.GetDataString(buffer)}");
 
                 byte[] recvBuffer = new byte[65];
 
@@ -66,7 +74,7 @@ namespace WagoService.Wago
 
                 // the recvBuffer is not used for SetPointState because there is no response
 
-                PointResponse result = action.Point.CreatePointResponse();
+                PointResponse result = point.CreatePointResponse();
 
                 return result;
             }
@@ -145,7 +153,7 @@ namespace WagoService.Wago
             return 0;
         }
 
-        protected byte[] CreateGetBlockStateBuffer()
+        protected virtual byte[] CreateGetBlockStateBuffer()
         {
             byte[] result = new byte[65];
             result[0] = 0x2;

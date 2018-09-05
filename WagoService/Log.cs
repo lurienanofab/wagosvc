@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Linq;
-using System.Text;
-using System.IO;
 
 namespace WagoService
 {
@@ -21,7 +18,7 @@ namespace WagoService
                 using (StreamWriter writer = File.AppendText(FilePath))
                 {
                     Program.ConsoleWriteLine(Text);
-                    string line = string.Format("[{0:yyyy-MM-dd HH:mm:ss}] {1}", DateTime.Now, Text);
+                    string line = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {Text}";
                     writer.WriteLine(line);
                     writer.Close();
                 }
@@ -53,7 +50,7 @@ namespace WagoService
             return Path.Combine(GetBaseDirectory(), string.Format("block{0}.log", blockId));
         }
 
-        public static bool Console = false;
+        public static bool UseConsole = false;
 
         public static void Start()
         {
@@ -67,7 +64,7 @@ namespace WagoService
             IsStarted = true;
 
             // Indicates when log file has started recording
-            Log.Write("Log file started.");
+            Write("Log file started.");
         }
 
         public static void Stop()
@@ -79,17 +76,23 @@ namespace WagoService
             }
         }
 
-        public static void Write(int blockId, string message, params object[] args)
+        /// <summary>
+        /// Append a message to a block log (each block has its own log file).
+        /// </summary>
+        public static void Write(int blockId, string message)
         {
-            EnqueueMessage(new Log.Message() { Text = string.Format(message, args), FilePath = Log.GetBlockLogPath(blockId) });
+            EnqueueMessage(new Message() { Text = message, FilePath = GetBlockLogPath(blockId) });
         }
 
-        public static void Write(string message, params object[] args)
+        /// <summary>
+        /// Append a message to the service log.
+        /// </summary>
+        public static void Write(string message)
         {
-            EnqueueMessage(new Log.Message() { Text = string.Format(message, args), FilePath = Log.GetServiceLogPath() });
+            EnqueueMessage(new Message() { Text = message, FilePath = GetServiceLogPath() });
         }
 
-        private static void EnqueueMessage(Log.Message message)
+        private static void EnqueueMessage(Message message)
         {
             if (IsStarted)
                 _queue.Add(message);
@@ -103,7 +106,7 @@ namespace WagoService
 
             while (!canceled)
             {
-                Log.Message message = null;
+                Message message = null;
 
                 try
                 {
@@ -112,13 +115,13 @@ namespace WagoService
                 catch (OperationCanceledException)
                 {
                     canceled = true;
-                    message = new Log.Message() { Text = "Log file stopped.", FilePath = Log.GetServiceLogPath() };
+                    message = new Message() { Text = "Log file stopped.", FilePath = GetServiceLogPath() };
                 }
 
                 message.Write();
 
-                if (Console)
-                    System.Console.WriteLine(message.Text);
+                if (UseConsole)
+                    Console.WriteLine(message.Text);
             }
         }
     }

@@ -1,28 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using LNF.Control;
+﻿using LNF.Control;
+using System;
 
 namespace WagoService.Actions
 {
     public abstract class ControlActionBase : IControlAction
     {
-        public Guid MessageID { get; private set; }
-
-        public DateTime TimeStamp { get; private set; }
-
-        public abstract int ActionID { get; }
+        public Guid MessageID { get; }
+        public DateTime Timestamp { get; }
 
         public ControlActionBase()
         {
             MessageID = Guid.NewGuid();
-            TimeStamp = DateTime.Now;
+            Timestamp = DateTime.Now;
         }
 
-        public abstract ControlResponse ExecuteCommand(IControlConnection service);
-
-        public abstract string GetLogMessage();
+        public abstract ControlResponse Execute(IControlConnection connection);
     }
 }

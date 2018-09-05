@@ -1,7 +1,7 @@
-﻿using LNF;
-using LNF.Control;
+﻿using LNF.Control;
 using LNF.Repository;
 using LNF.Repository.Control;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using WagoService.Actions;
@@ -14,28 +14,42 @@ namespace WagoService.Test
 
         public TestConnection()
         {
-            using (Providers.DataAccess.StartUnitOfWork())
-                _points = DA.Current.Query<Point>().ToList().Select(x => x.CreatePointState(false)).ToArray();
+            _points = DA.Current.Query<Point>().ToList().Select(x => x.CreatePointState(false)).ToArray();
         }
 
-        public BlockResponse SendGetBlockStateCommand(BlockAction action)
+        public ControlResponse Execute(Block block, IControlAction action)
         {
-            BlockResponse result = action.Block.CreateBlockResponse();
-            result.BlockState.Points = _points.Where(x => x.BlockID == action.Block.BlockID).ToArray();
-            return result;
+            throw new NotImplementedException();
         }
 
-        public PointResponse SendSetPointStateCommand(PointAction action)
+        public BlockResponse SendGetBlockStateCommand(int blockId)
         {
-            PointResponse result = action.Point.CreatePointResponse();
-            PointState ps = _points.FirstOrDefault(x => x.PointID == action.Point.PointID);
+            Block block = DA.Current.Single<Block>(blockId);
+
+            try
+            {
+                BlockResponse result = block.CreateBlockResponse();
+                result.BlockState.Points = _points.Where(x => x.BlockID == block.BlockID).ToArray();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return block.CreateBlockResponse(ex);
+            }
+        }
+
+        public PointResponse SendSetPointStateCommand(int pointId, bool state)
+        {
+            var point = DA.Current.Single<Point>(pointId);
+            var result = point.CreatePointResponse();
+            var ps = _points.FirstOrDefault(x => x.PointID == point.PointID);
 
             if (ps != null)
-                ps.State = action.State;
+                ps.State = state;
             else
             {
                 result.Error = true;
-                result.Message = string.Format("Point {0} not found on Block {1}.", action.Point.PointID, action.Point.Block.BlockID);
+                result.Message = string.Format("Point {0} not found on Block {1}.", point.PointID, point.Block.BlockID);
             }
 
             return result;

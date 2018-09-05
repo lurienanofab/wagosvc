@@ -36,7 +36,7 @@ namespace WagoService
                 }
             }
 
-            Service1 service = IOC.Container.GetInstance<Service1>();
+            Service1 service = new Service1();
 
             if (_consoleMode)
             {
