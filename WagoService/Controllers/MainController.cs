@@ -1,4 +1,7 @@
-﻿using LNF.Control;
+﻿using LNF;
+using LNF.Control;
+using LNF.Repository;
+using LNF.Repository.Control;
 using System;
 using System.Web.Http;
 using WagoService.Actions;
@@ -34,9 +37,21 @@ namespace WagoService.Controllers
             return result;
         }
 
+        [HttpGet, Route("wago/point/{pointId}")]
+        public PointResponse SetPointState(int pointId, bool state, uint duration = 0)
+        {
+            using (ServiceProvider.Current.DataAccess.StartUnitOfWork())
+            {
+                var point = DA.Current.Single<Point>(pointId);
+                return SetPointState(point.Block.BlockID, point.PointID, state, duration);
+            }
+        }
+
         [HttpGet, Route("wago/block/{blockId}/point/{pointId}")]
         public PointResponse SetPointState(int blockId, int pointId, bool state, uint duration = 0)
         {
+            // This method is better because it doesn't need NHibernate
+
             // Compose Action object
             PointAction action = new PointAction(pointId, state);
 
@@ -64,9 +79,21 @@ namespace WagoService.Controllers
             return result;
         }
 
+        [HttpGet, Route("wago/point/{pointId}/cancel")]
+        public PointResponse Cancel(int pointId)
+        {
+            using (ServiceProvider.Current.DataAccess.StartUnitOfWork())
+            {
+                var point = DA.Current.Single<Point>(pointId);
+                return Cancel(point.Block.BlockID, point.PointID);
+            }
+        }
+
         [HttpGet, Route("wago/block/{blockId}/point/{pointId}/cancel")]
         public PointResponse Cancel(int blockId, int pointId)
         {
+            // This method is better because it doesn't need NHibernate
+
             var result = new PointResponse()
             {
                 BlockID = blockId,
