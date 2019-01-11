@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27703.2000
+VisualStudioVersion = 15.0.26228.57
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WagoService", "wagoservice\WagoService.csproj", "{FF2B1B4C-33FF-4BA7-AB60-4E52E17762D9}"
 EndProject
@@ -11,28 +11,45 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LNF.Impl", "..\lnf\LNF.Impl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LNF.Models", "..\lnf\LNF.Models\LNF.Models.csproj", "{98C7F73D-EF9D-4A87-8B79-A1208085CFBD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineServices.Api", "..\lnf\OnlineServices.Api\OnlineServices.Api.csproj", "{D0C76FE8-7233-4DA5-B106-8E4F51A32AD2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
+		Staging|Any CPU = Staging|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{FF2B1B4C-33FF-4BA7-AB60-4E52E17762D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FF2B1B4C-33FF-4BA7-AB60-4E52E17762D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FF2B1B4C-33FF-4BA7-AB60-4E52E17762D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FF2B1B4C-33FF-4BA7-AB60-4E52E17762D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF2B1B4C-33FF-4BA7-AB60-4E52E17762D9}.Staging|Any CPU.ActiveCfg = Release|Any CPU
+		{FF2B1B4C-33FF-4BA7-AB60-4E52E17762D9}.Staging|Any CPU.Build.0 = Release|Any CPU
 		{E3B73410-869B-4BA2-99AC-AD6708A27ADE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E3B73410-869B-4BA2-99AC-AD6708A27ADE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E3B73410-869B-4BA2-99AC-AD6708A27ADE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E3B73410-869B-4BA2-99AC-AD6708A27ADE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3B73410-869B-4BA2-99AC-AD6708A27ADE}.Staging|Any CPU.ActiveCfg = Release|Any CPU
+		{E3B73410-869B-4BA2-99AC-AD6708A27ADE}.Staging|Any CPU.Build.0 = Release|Any CPU
 		{F490B789-B824-4A8C-90FC-AC447C3277F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F490B789-B824-4A8C-90FC-AC447C3277F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F490B789-B824-4A8C-90FC-AC447C3277F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F490B789-B824-4A8C-90FC-AC447C3277F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F490B789-B824-4A8C-90FC-AC447C3277F0}.Staging|Any CPU.ActiveCfg = Release|Any CPU
+		{F490B789-B824-4A8C-90FC-AC447C3277F0}.Staging|Any CPU.Build.0 = Release|Any CPU
 		{98C7F73D-EF9D-4A87-8B79-A1208085CFBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{98C7F73D-EF9D-4A87-8B79-A1208085CFBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{98C7F73D-EF9D-4A87-8B79-A1208085CFBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{98C7F73D-EF9D-4A87-8B79-A1208085CFBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98C7F73D-EF9D-4A87-8B79-A1208085CFBD}.Staging|Any CPU.ActiveCfg = Release|Any CPU
+		{98C7F73D-EF9D-4A87-8B79-A1208085CFBD}.Staging|Any CPU.Build.0 = Release|Any CPU
+		{D0C76FE8-7233-4DA5-B106-8E4F51A32AD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0C76FE8-7233-4DA5-B106-8E4F51A32AD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0C76FE8-7233-4DA5-B106-8E4F51A32AD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0C76FE8-7233-4DA5-B106-8E4F51A32AD2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0C76FE8-7233-4DA5-B106-8E4F51A32AD2}.Staging|Any CPU.ActiveCfg = Staging|Any CPU
+		{D0C76FE8-7233-4DA5-B106-8E4F51A32AD2}.Staging|Any CPU.Build.0 = Staging|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
